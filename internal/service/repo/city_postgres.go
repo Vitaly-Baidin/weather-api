@@ -76,7 +76,7 @@ func (r *CityRepo) GetAllCities(ctx context.Context) ([]entity.City, error) {
 			return nil, fmt.Errorf("CityRepo - FindAllCities - rows.Scan: %w", err)
 		}
 
-		result = append(result)
+		result = append(result, city)
 	}
 
 	return result, nil
