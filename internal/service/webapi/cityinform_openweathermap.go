@@ -12,38 +12,38 @@ var (
 	apikey = "c4435be349344355dfeeadc4261d8e59"
 )
 
-// CityInformationWebAPI -.
-type CityInformationWebAPI struct {
+// CityWebAPI -.
+type CityWebAPI struct {
 }
 
-// New -.
-func New() *CityInformationWebAPI {
-	return &CityInformationWebAPI{}
+// NewCity -.
+func NewCity() *CityWebAPI {
+	return &CityWebAPI{}
 }
 
-func (wa *CityInformationWebAPI) GetInformation(name string) (entity.City, error) {
-	url := fmt.Sprintf("http://api.openweathermap.org/geo/1.0/direct?q=%s&limit=1&appid=%s", name, apikey)
+func (wa *CityWebAPI) GetInformation(name string) ([]entity.City, error) {
+	url := fmt.Sprintf("http://api.openweathermap.org/geo/1.0/direct?q=%s&appid=%s", name, apikey) // ?? &limit=1
 	response, err := http.Get(url)
 	if err != nil {
-		return entity.City{}, fmt.Errorf("CityInformationWebAPI = GetInformation - http.Get: %w", err)
+		return nil, fmt.Errorf("CityWebAPI = GetInformation - http.Get: %w", err)
 	}
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return entity.City{}, fmt.Errorf("CityInformationWebAPI = GetInformation - io.ReadAll: %w", err)
+		return nil, fmt.Errorf("CityWebAPI = GetInformation - io.ReadAll: %w", err)
 	}
 
 	var cities entity.Cities
 
 	err = json.Unmarshal(body, &cities)
 	if err != nil {
-		return entity.City{}, fmt.Errorf("CityInformationWebAPI = GetInformation - json.Unmarshal: %w", err)
+		return nil, fmt.Errorf("CityWebAPI = GetInformation - json.Unmarshal: %w", err)
 	}
 
 	if len(cities) == 0 {
-		return entity.City{}, fmt.Errorf("city not found")
+		return nil, fmt.Errorf("city not found")
 	}
 
-	return cities[0], nil
+	return cities, nil
 }
