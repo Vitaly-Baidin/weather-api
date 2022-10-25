@@ -7,6 +7,8 @@ import (
 	"github.com/Vitaly-Baidin/weather-api/entity"
 )
 
+var errCityExists = errors.New("city already exists")
+
 // CityService -.
 type CityService struct {
 	repo   CityRepo
@@ -18,52 +20,52 @@ func NewCity(r CityRepo, api CityWebAPI) *CityService {
 	return &CityService{repo: r, webAPI: api}
 }
 
-// SetCity -.
-func (s *CityService) SetCity(ctx context.Context, name string) (entity.City, error) {
-	cities, err := s.webAPI.GetInformation(name)
+func (s *CityService) GetByID(ctx context.Context, cityID uint) (entity.City, error) {
+	city, err := s.repo.FindByID(ctx, cityID)
 	if err != nil {
-		return entity.City{}, fmt.Errorf("CityService - SetCity - webAPI.GetInformation: %w", err)
+		return entity.City{}, fmt.Errorf("service.CityService - GetByID - FindByID: %w", err)
 	}
 
-	flag := -1
-
-	for i, city := range cities {
-		ifExists, err := s.repo.IfExists(ctx, city)
-		if err != nil {
-			return entity.City{}, fmt.Errorf("CityService - SetCity - repo.IfExists: %w", err)
-		}
-		if !ifExists {
-			flag = i
-			break
-		}
-	}
-
-	if flag == -1 {
-		return entity.City{}, errors.New("city already exists")
-	}
-
-	err = s.repo.SaveCity(ctx, cities[flag])
-	if err != nil {
-		return entity.City{}, fmt.Errorf("CityService - SetCity - repo.SaveCity: %w", err)
-	}
-
-	return cities[flag], nil
+	return city, nil
 }
 
-// FindCityByName -.
-func (s *CityService) FindCityByName(ctx context.Context, name string) ([]entity.City, error) {
-	cities, err := s.repo.GetCityByName(ctx, name)
+func (s *CityService) GetByFullAddress(ctx context.Context, country, name string) (entity.City, error) {
+	city, err := s.repo.FindByFullAddress(ctx, country, name)
 	if err != nil {
-		return nil, fmt.Errorf("CityService - FindCityByName - repo.GetCityByName: %w", err)
+		return entity.City{}, fmt.Errorf("service.CityService - GetByFullAddress - FindByFullAddress: %w", err)
 	}
-	return cities, nil
+
+	return city, nil
 }
 
-// FindAllCities -.
-func (s *CityService) FindAllCities(ctx context.Context) ([]entity.City, error) {
-	cities, err := s.repo.GetAllCities(ctx)
+func (s *CityService) GetIDByFullAddress(ctx context.Context, country, name string) (uint, error) {
+	id, err := s.repo.FindIDByFullAddress(ctx, country, name)
 	if err != nil {
-		return nil, fmt.Errorf("CityService - FindAllCities - repo.GetAllCities: %w", err)
+		return 0, fmt.Errorf("service.CityService - GetIDByFullAddress - repo.FindIDByFullAddress: %w", err)
 	}
-	return cities, nil
+
+	return id, nil
+}
+
+func (s *CityService) SaveFromAPI(ctx context.Context, country, state, name string) error {
+	city, err := s.webAPI.FindByFullAddress(ctx, country, state, name)
+	if err != nil {
+		return fmt.Errorf("CityService - SaveFromAPI - webAPI.FindByFullAddress: %w", err)
+	}
+
+	ifExists, err := s.repo.IfExistsByCoord(ctx, city.Longitude, city.Latitude)
+	if err != nil {
+		return fmt.Errorf("CityService - SaveFromAPI - repo.IfExistsByCoord: %w", err)
+	}
+
+	if ifExists {
+		return errCityExists
+	}
+
+	err = s.repo.Store(ctx, city)
+	if err != nil {
+		return fmt.Errorf("CityService - SaveFromAPI - repo.Store: %w", err)
+	}
+
+	return nil
 }
