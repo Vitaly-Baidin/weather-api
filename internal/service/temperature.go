@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/Vitaly-Baidin/weather-api/entity"
 )
@@ -48,10 +49,16 @@ func (s *TemperatureService) GetByCityIDAndTimestamp(ctx context.Context, cityID
 		return entity.TemperatureResponse{}, fmt.Errorf("TemperatureService - GetAllUniqueCityID - FindAllUniqueCityID: %w", err)
 	}
 
+	message := json.RawMessage{}
+	err = message.UnmarshalJSON(temperature.Data)
+	if err != nil {
+		return entity.TemperatureResponse{}, fmt.Errorf("TemperatureService - GetAllUniqueCityID - message.UnmarshalJSON: %w", err)
+	}
+
 	result := entity.TemperatureResponse{
 		Temperature: temperature.Temperature,
 		Timestamp:   temperature.Timestamp,
-		Data:        temperature.Data,
+		Data:        message,
 	}
 
 	return result, nil

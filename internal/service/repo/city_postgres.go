@@ -71,7 +71,7 @@ func (r *City) FindIDByFullAddress(ctx context.Context, country, name string) (u
 
 	err := row.Scan(&result)
 	if err != nil {
-		return 0, fmt.Errorf("repo.City - FindByFullAddress - row.Scan: %w", err)
+		return 0, fmt.Errorf("repo.City - FindIDByFullAddress - row.Scan: %w", err)
 	}
 
 	return result, nil

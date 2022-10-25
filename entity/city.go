@@ -15,5 +15,4 @@ type CityResponse struct {
 	Country     string        `json:"country"`
 	Temperature float64       `json:"temperature,omitempty"`
 	Weather     []Temperature `json:"weather,omitempty"`
-	Links       []Link        `json:"links,omitempty"`
 }

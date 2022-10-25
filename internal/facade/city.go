@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/Vitaly-Baidin/weather-api/entity"
 	"github.com/Vitaly-Baidin/weather-api/internal/service"
-	"strings"
 	"time"
 )
 
@@ -86,22 +85,11 @@ func (f *City) UpdateActualTemp(ctx context.Context) error {
 }
 
 func createCityResponse(city entity.City, temperature float64, weather []entity.Temperature) entity.CityResponse {
-	links := []entity.Link{
-		{
-			Href: fmt.Sprintf("city/%s/%s/summary", strings.ToLower(city.Country), strings.ToLower(city.Name)),
-			Type: "GET",
-		},
-		{
-			Href: fmt.Sprintf("city/%s/%s/detail", strings.ToLower(city.Country), strings.ToLower(city.Name)),
-			Type: "GET",
-		},
-	}
 	cr := entity.CityResponse{
 		Name:        city.Name,
 		Country:     city.Country,
 		Temperature: temperature,
 		Weather:     weather,
-		Links:       links,
 	}
 
 	return cr

@@ -16,7 +16,7 @@ type Temperature struct {
 }
 
 type TemperatureResponse struct {
-	Timestamp   int64   `json:"date"`
-	Temperature float64 `json:"temperature"`
-	Data        []byte  `json:"data"`
+	Timestamp   int64           `json:"date"`
+	Temperature float64         `json:"temperature"`
+	Data        json.RawMessage `json:"data"`
 }
