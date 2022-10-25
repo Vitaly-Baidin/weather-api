@@ -9,6 +9,7 @@ type (
 	// Config -.
 	Config struct {
 		App  `yaml:"app"`
+		Api  `yaml:"api"`
 		HTTP `yaml:"http"`
 		Log  `yaml:"logger"`
 		PG   `yaml:"postgres"`
@@ -18,6 +19,11 @@ type (
 	App struct {
 		Name    string `env-required:"true" yaml:"name"    env:"APP_NAME"`
 		Version string `env-required:"true" yaml:"version" env:"APP_VERSION"`
+	}
+
+	// Api -.
+	Api struct {
+		OpenweathermapKey string `env-required:"true" env:"OW_KEY"`
 	}
 
 	// HTTP -.

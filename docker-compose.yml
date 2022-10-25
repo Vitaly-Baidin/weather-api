@@ -16,6 +16,7 @@ services:
     image: app
     environment:
       PG_URL: 'postgres://root:rootroot@172.19.0.2:5432/weather'
+      OW_KEY: 'c4435be349344355dfeeadc4261d8e59'
     ports:
       - 8080:8080
     depends_on:

@@ -35,8 +35,8 @@ func Run(cfg *config.Config) {
 	tempRepo := repo.NewTemperature(db)
 
 	// Register WebAPIs
-	cityAPI := webapi.NewCity()
-	tempAPI := webapi.NewTemperature()
+	cityAPI := webapi.NewCity(cfg.Api.OpenweathermapKey)
+	tempAPI := webapi.NewTemperature(cfg.Api.OpenweathermapKey)
 
 	// Register Services
 	cityService := service.NewCity(cityRepo, cityAPI)

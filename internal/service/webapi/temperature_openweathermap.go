@@ -14,11 +14,12 @@ import (
 
 // TemperatureWebAPI -.
 type TemperatureWebAPI struct {
+	apiKey string
 }
 
 // NewTemperature -.
-func NewTemperature() *TemperatureWebAPI {
-	return &TemperatureWebAPI{}
+func NewTemperature(apiKey string) *TemperatureWebAPI {
+	return &TemperatureWebAPI{apiKey: apiKey}
 }
 
 // FindByCoord -.
@@ -27,7 +28,7 @@ func (wa *TemperatureWebAPI) FindByCoord(ctx context.Context, lat float64, lon f
 
 	queries.Add("lat", fmt.Sprintf("%f", lat))
 	queries.Add("lon", fmt.Sprintf("%f", lon))
-	queries.Add("appid", apikey)
+	queries.Add("appid", wa.apiKey)
 	queries.Add("units", "metric")
 
 	u := url.URL{

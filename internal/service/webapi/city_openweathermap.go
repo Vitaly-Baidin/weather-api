@@ -11,17 +11,14 @@ import (
 	"time"
 )
 
-var (
-	apikey = "c4435be349344355dfeeadc4261d8e59"
-)
-
 // CityWebAPI -.
 type CityWebAPI struct {
+	apiKey string
 }
 
 // NewCity -.
-func NewCity() *CityWebAPI {
-	return &CityWebAPI{}
+func NewCity(apiKey string) *CityWebAPI {
+	return &CityWebAPI{apiKey: apiKey}
 }
 
 func (wa *CityWebAPI) FindByFullAddress(ctx context.Context, country, state, name string) (entity.City, error) {
@@ -29,7 +26,7 @@ func (wa *CityWebAPI) FindByFullAddress(ctx context.Context, country, state, nam
 
 	queries.Add("q", createNameStr(country, state, name))
 	queries.Add("limit", "1")
-	queries.Add("appid", apikey)
+	queries.Add("appid", wa.apiKey)
 
 	u := url.URL{
 		Scheme:   "http",
