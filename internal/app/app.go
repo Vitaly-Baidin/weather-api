@@ -2,24 +2,32 @@ package app
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
+	"github.com/Vitaly-Baidin/weather-api/config"
 	v1 "github.com/Vitaly-Baidin/weather-api/internal/controller/http/v1"
+	"github.com/Vitaly-Baidin/weather-api/internal/cronjob"
 	"github.com/Vitaly-Baidin/weather-api/internal/facade"
 	"github.com/Vitaly-Baidin/weather-api/internal/service"
 	"github.com/Vitaly-Baidin/weather-api/internal/service/repo"
 	"github.com/Vitaly-Baidin/weather-api/internal/service/webapi"
+	"github.com/Vitaly-Baidin/weather-api/pkg/httpserver"
+	"github.com/Vitaly-Baidin/weather-api/pkg/logger"
 	"github.com/Vitaly-Baidin/weather-api/pkg/postgres"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
-func Run() {
-	db, err := postgres.New("postgres://root:rootroot@localhost:5432/weather")
+func Run(cfg *config.Config) {
+	l := logger.New(cfg.Log.Level)
+
+	db, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	defer db.Close()
 	if err != nil {
-		log.Fatalln(err)
+		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 
 	// Register Repositories
@@ -37,36 +45,67 @@ func Run() {
 	// Register Facades
 	cityFacade := facade.NewCity(cityService, tempService)
 	tempFacade := facade.NewTemperature(cityService, tempService)
-	rv1 := v1.NewRouter(cityFacade, tempFacade)
 
-	// create a new server
-	s := http.Server{
-		Addr:         ":8080",           // configure the bind address
-		Handler:      rv1,               // set the default handler
-		ReadTimeout:  5 * time.Second,   // max time to read request from the client
-		WriteTimeout: 10 * time.Second,  // max time to write response to the client
-		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
+	// Examples cities
+	initCities("city.csv", cityService)
+
+	// Register cron
+	cron := cronjob.NewCron(l)
+	cron.StartCron()
+
+	cronjob.RegisterJob(cron, func() {
+		ctx := context.Background()
+		err := cityFacade.UpdateActualTemp(ctx)
+		if err != nil {
+			l.Error(err, "app - RegisterJob - UpdateActualTemp")
+			return
+		}
+		l.Info("UpdateActualTemp")
+	})
+
+	defer cron.StopCron()
+
+	// Register Server
+	rv1 := v1.NewRouter(cityFacade, tempFacade, l)
+
+	httpServer := httpserver.New(rv1, httpserver.Port(cfg.HTTP.Port))
+
+	// Waiting signal
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case s := <-interrupt:
+		l.Info("app - Run - signal: " + s.String())
+	case err = <-httpServer.Notify():
+		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
 	}
 
-	// start the server
-	go func() {
-		fmt.Println("Starting server on port 9090")
+	// Shutdown
+	err = httpServer.Shutdown()
+	if err != nil {
+		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
+	}
+}
 
-		err := s.ListenAndServe()
+func initCities(filename string, city service.City) {
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Fatal("Unable to read input file "+filename, err)
+	}
+	defer f.Close()
+
+	csvReader := csv.NewReader(f)
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		log.Fatal("Unable to parse file as CSV for "+filename, err)
+	}
+
+	for _, elem := range records {
+		time.Sleep(200 * time.Millisecond)
+		err = city.SaveFromAPI(context.Background(), "", "", elem[0])
 		if err != nil {
-			fmt.Printf("Error starting server: %s\n", err)
-			os.Exit(1)
+			log.Fatal("initCities - city.SaveFromAPI", err)
 		}
-	}()
-
-	//gracefully shutdown
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, os.Kill)
-
-	sig := <-c
-	log.Println("Got signal:", sig)
-
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	s.Shutdown(ctx)
+	}
 }

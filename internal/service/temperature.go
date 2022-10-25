@@ -57,13 +57,14 @@ func (s *TemperatureService) GetByCityIDAndTimestamp(ctx context.Context, cityID
 	return result, nil
 }
 
-func (s *TemperatureService) SaveFromAPI(ctx context.Context, lat, lon float64) error {
+func (s *TemperatureService) SaveFromAPI(ctx context.Context, lat, lon float64, cityID uint) error {
 	temps, err := s.webAPI.FindByCoord(ctx, lat, lon)
 	if err != nil {
 		return fmt.Errorf("TemperatureService - SaveFromAPI - webAPI.FindByCoord: %w", err)
 	}
 
 	for _, temp := range temps {
+		temp.CityID = cityID
 		err = s.repo.Store(ctx, temp)
 		if err != nil {
 			return fmt.Errorf("TemperatureService - SaveFromAPI - repo.Store: %w", err)

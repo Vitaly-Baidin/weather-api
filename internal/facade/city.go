@@ -6,6 +6,7 @@ import (
 	"github.com/Vitaly-Baidin/weather-api/entity"
 	"github.com/Vitaly-Baidin/weather-api/internal/service"
 	"strings"
+	"time"
 )
 
 type City struct {
@@ -61,6 +62,27 @@ func (f *City) GetSummary(ctx context.Context, country, name string) (entity.Cit
 
 	return response, nil
 
+}
+
+func (f *City) UpdateActualTemp(ctx context.Context) error {
+	allCoord, err := f.cityService.GetAllCoord(ctx)
+	if err != nil {
+		return fmt.Errorf("facade.City - UpdateActualTemp - GetAllCoord: %w", err)
+	}
+
+	for _, elem := range allCoord {
+		cityID, err := f.cityService.GetIDByCoord(ctx, elem[0], elem[1])
+		if err != nil {
+			return fmt.Errorf("facade.City - UpdateActualTemp - GetIDByCoord: %w", err)
+		}
+		time.Sleep(200 * time.Millisecond)
+		err = f.tempService.SaveFromAPI(ctx, elem[0], elem[1], cityID)
+		if err != nil {
+			return fmt.Errorf("facade.City - UpdateActualTemp - SaveFromAPI: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func createCityResponse(city entity.City, temperature float64, weather []entity.Temperature) entity.CityResponse {

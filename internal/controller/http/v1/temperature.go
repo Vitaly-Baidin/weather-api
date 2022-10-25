@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/Vitaly-Baidin/weather-api/entity"
 	"github.com/Vitaly-Baidin/weather-api/internal/facade"
+	"github.com/Vitaly-Baidin/weather-api/pkg/logger"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
 	"net/http"
@@ -12,10 +13,11 @@ import (
 
 type Temperature struct {
 	temp facade.TemperatureFacade
+	log  logger.Logger
 }
 
-func NewTemperature(temp facade.TemperatureFacade) *Temperature {
-	return &Temperature{temp: temp}
+func NewTemperature(temp facade.TemperatureFacade, log logger.Logger) *Temperature {
+	return &Temperature{temp: temp, log: log}
 }
 
 func (h *Temperature) DetailSingle(rw http.ResponseWriter, r *http.Request) {
@@ -29,6 +31,7 @@ func (h *Temperature) DetailSingle(rw http.ResponseWriter, r *http.Request) {
 
 	tsInt, err := strconv.Atoi(timestamp)
 	if err != nil {
+		h.log.Error(err, "http - v1 - DetailSingle")
 		rw.WriteHeader(http.StatusBadRequest)
 		entity.ToJSON(&GenericError{Message: err.Error()}, rw)
 		return
@@ -36,10 +39,12 @@ func (h *Temperature) DetailSingle(rw http.ResponseWriter, r *http.Request) {
 
 	cities, err := h.temp.GetWeatherDetail(r.Context(), countryName, cityName, tsInt)
 	if errors.Is(err, pgx.ErrNoRows) {
+		h.log.Error(err, "http - v1 - DetailSingle")
 		rw.WriteHeader(http.StatusNotFound)
 		entity.ToJSON(&GenericError{Message: err.Error()}, rw)
 		return
 	} else if err != nil {
+		h.log.Error(err, "http - v1 - DetailSingle")
 		rw.WriteHeader(http.StatusInternalServerError)
 		entity.ToJSON(&GenericError{Message: err.Error()}, rw)
 		return

@@ -11,8 +11,8 @@ import (
 const (
 	insertTemperatureQuery = `INSERT INTO temperature (timestamp, temp, city_id, data) 
 							  VALUES ($1, $2, $3, $4) 
-							  ON CONFLICT (timestamp) DO UPDATE 
-							  SET temp = excluded.temp, data=excluded.data`
+							  ON CONFLICT (timestamp, city_id) DO UPDATE 
+							  SET temp=excluded.temp, data=excluded.data`
 
 	findAllUniqueCityIDQuery      = `SELECT DISTINCT city_id FROM temperature`
 	findActualMidTempQuery        = `SELECT AVG(temp) FROM temperature WHERE city_id=$1 AND timestamp >= $2`
@@ -98,7 +98,7 @@ func (r *Temperature) FindByCityIDAndTimestamp(ctx context.Context, cityID uint,
 func (r *Temperature) Store(ctx context.Context, temperature entity.Temperature) error {
 	_, err := r.Pool.Exec(ctx, insertTemperatureQuery, temperature.Timestamp, temperature.Temperature, temperature.CityID, temperature.Data)
 	if err != nil {
-		return fmt.Errorf("Temperature - Store - Pool.Exec: %w", err)
+		return fmt.Errorf("temperature - Store - Pool.Exec: %w", err)
 	}
 
 	return nil

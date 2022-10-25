@@ -11,6 +11,8 @@ type (
 		GetByID(ctx context.Context, cityID uint) (entity.City, error)
 		GetByFullAddress(ctx context.Context, country, name string) (entity.City, error)
 		GetIDByFullAddress(ctx context.Context, country, name string) (uint, error)
+		GetIDByCoord(ctx context.Context, lat, lon float64) (uint, error)
+		GetAllCoord(ctx context.Context) ([][2]float64, error)
 		SaveFromAPI(ctx context.Context, country, state, name string) error
 	}
 
@@ -20,6 +22,8 @@ type (
 		FindByID(ctx context.Context, cityID uint) (entity.City, error)
 		FindByFullAddress(ctx context.Context, country, name string) (entity.City, error)
 		FindIDByFullAddress(ctx context.Context, country, name string) (uint, error)
+		FindIDByCoord(ctx context.Context, lat, lon float64) (uint, error)
+		FindAllCoord(ctx context.Context) ([][2]float64, error)
 		IfExistsByCoord(ctx context.Context, lat, lon float64) (bool, error)
 	}
 
@@ -36,7 +40,7 @@ type (
 		GetActualMidTempByCityID(ctx context.Context, cityID uint) (float64, error)
 		GetAllByCityID(ctx context.Context, cityID uint) ([]entity.Temperature, error)
 		GetByCityIDAndTimestamp(ctx context.Context, cityID uint, timestamp int) (entity.TemperatureResponse, error)
-		SaveFromAPI(ctx context.Context, lat, lon float64) error
+		SaveFromAPI(ctx context.Context, lat, lon float64, cityID uint) error
 	}
 
 	// TemperatureRepo -.

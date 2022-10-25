@@ -8,6 +8,7 @@ import (
 type CityFacade interface {
 	GetAll(ctx context.Context) ([]entity.CityResponse, error)
 	GetSummary(ctx context.Context, country, name string) (entity.CityResponse, error)
+	UpdateActualTemp(ctx context.Context) error
 }
 
 type TemperatureFacade interface {

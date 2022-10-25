@@ -47,6 +47,24 @@ func (s *CityService) GetIDByFullAddress(ctx context.Context, country, name stri
 	return id, nil
 }
 
+func (s *CityService) GetIDByCoord(ctx context.Context, lat, lon float64) (uint, error) {
+	id, err := s.repo.FindIDByCoord(ctx, lat, lon)
+	if err != nil {
+		return 0, fmt.Errorf("service.CityService - GetIDByCoord - repo.FindIDByCoord: %w", err)
+	}
+
+	return id, nil
+}
+
+func (s *CityService) GetAllCoord(ctx context.Context) ([][2]float64, error) {
+	result, err := s.repo.FindAllCoord(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("service.CityService - GetAllCoord - repo.GetAllCoord: %w", err)
+	}
+
+	return result, nil
+}
+
 func (s *CityService) SaveFromAPI(ctx context.Context, country, state, name string) error {
 	city, err := s.webAPI.FindByFullAddress(ctx, country, state, name)
 	if err != nil {

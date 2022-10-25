@@ -73,7 +73,7 @@ func (wa *TemperatureWebAPI) FindByCoord(ctx context.Context, lat float64, lon f
 			return nil, fmt.Errorf("TemperatureWebAPI - FindByCoord - json.Unmarshal: %w", err)
 		}
 
-		fmt.Println(temp)
+		temp.Data = append(temp.Data, tempJSON...)
 		result = append(result, temp)
 	}
 
