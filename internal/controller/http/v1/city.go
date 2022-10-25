@@ -20,6 +20,14 @@ func NewCity(city facade.CityFacade, log logger.Logger) *City {
 	return &City{city: city, log: log}
 }
 
+// swagger:route GET /city cities ListAll
+// Return a list of city from the database
+// responses:
+//	200: []cityResponse
+// 	404: GenericError
+//	500: GenericError
+
+// ListAll handles GET requests and returns all current city
 func (h *City) ListAll(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-Type", "application/json")
 
@@ -45,6 +53,14 @@ func (h *City) ListAll(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// swagger:route GET /city/{country}/{name}/summary city SummarySingle
+// Return city from the database
+// responses:
+//	200: cityResponse
+//	404: GenericError
+//	500: GenericError
+
+// SummarySingle handles GET requests
 func (h *City) SummarySingle(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-Type", "application/json")
 

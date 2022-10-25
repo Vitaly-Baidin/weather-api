@@ -16,7 +16,7 @@ const (
 
 	findAllUniqueCityIDQuery      = `SELECT DISTINCT city_id FROM temperature`
 	findActualMidTempQuery        = `SELECT AVG(temp) FROM temperature WHERE city_id=$1 AND timestamp >= $2`
-	findAllByCityIDQuery          = `SELECT timestamp, temp, city_id, data FROM temperature WHERE city_id=$1`
+	findAllByCityIDQuery          = `SELECT timestamp, temp, city_id, data FROM temperature WHERE city_id=$1 ORDER BY timestamp`
 	findByCityIDAndTimestampQuery = `SELECT timestamp, temp, city_id, data FROM temperature WHERE city_id=$1 AND timestamp=$2`
 )
 

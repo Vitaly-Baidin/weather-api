@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Vitaly-Baidin/weather-api/entity"
 	"github.com/Vitaly-Baidin/weather-api/internal/service"
+	"sort"
 	"time"
 )
 
@@ -38,6 +39,9 @@ func (f *City) GetAll(ctx context.Context) ([]entity.CityResponse, error) {
 		result = append(result, response)
 	}
 
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Name < result[j].Name
+	})
 	return result, nil
 }
 
