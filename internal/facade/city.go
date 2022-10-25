@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Vitaly-Baidin/weather-api/entity"
 	"github.com/Vitaly-Baidin/weather-api/internal/service"
+	"golang.org/x/sync/errgroup"
 	"sort"
 	"time"
 )
@@ -73,16 +74,26 @@ func (f *City) UpdateActualTemp(ctx context.Context) error {
 		return fmt.Errorf("facade.City - UpdateActualTemp - GetAllCoord: %w", err)
 	}
 
+	g, ctx := errgroup.WithContext(ctx)
+
 	for _, elem := range allCoord {
 		cityID, err := f.cityService.GetIDByCoord(ctx, elem[0], elem[1])
 		if err != nil {
 			return fmt.Errorf("facade.City - UpdateActualTemp - GetIDByCoord: %w", err)
 		}
-		time.Sleep(200 * time.Millisecond)
-		err = f.tempService.SaveFromAPI(ctx, elem[0], elem[1], cityID)
-		if err != nil {
-			return fmt.Errorf("facade.City - UpdateActualTemp - SaveFromAPI: %w", err)
-		}
+
+		g.Go(func() error {
+			time.Sleep(200 * time.Millisecond)
+			err = f.tempService.SaveFromAPI(ctx, elem[0], elem[1], cityID)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("facade.City - UpdateActualTemp - SaveFromAPI: %w", err)
 	}
 
 	return nil
