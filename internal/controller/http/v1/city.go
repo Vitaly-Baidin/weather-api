@@ -24,8 +24,8 @@ func NewCity(city facade.CityFacade, log logger.Logger) *City {
 // Return a list of city from the database
 // responses:
 //	200: []cityResponse
-// 	404: GenericError
-//	500: GenericError
+// 	404: errorResponse
+//	500: errorResponse
 
 // ListAll handles GET requests and returns all current city
 func (h *City) ListAll(rw http.ResponseWriter, r *http.Request) {
@@ -57,8 +57,8 @@ func (h *City) ListAll(rw http.ResponseWriter, r *http.Request) {
 // Return city from the database
 // responses:
 //	200: cityResponse
-//	404: GenericError
-//	500: GenericError
+//	404: errorResponse
+//	500: errorResponse
 
 // SummarySingle handles GET requests
 func (h *City) SummarySingle(rw http.ResponseWriter, r *http.Request) {

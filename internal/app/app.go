@@ -53,7 +53,7 @@ func Run(cfg *config.Config) {
 	cron := cronjob.NewCron(l)
 	cron.StartCron()
 
-	cronjob.RegisterJob(cron, func() {
+	cronjob.RegisterJob(cron, "* * * * *", func() {
 		ctx := context.Background()
 		err := cityFacade.UpdateActualTemp(ctx)
 		if err != nil {

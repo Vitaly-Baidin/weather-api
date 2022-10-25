@@ -11,4 +11,5 @@ COPY --from=builder /app/weather .
 COPY ./config/config.yml ./config/config.yml
 COPY ./city.csv ./city.csv
 COPY ./migrations ./migrations
+COPY ./swagger.yaml .
 CMD ["/app/weather"]

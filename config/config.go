@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	// Config -.
+	// Config - full configuration.
 	Config struct {
 		App  `yaml:"app"`
 		Api  `yaml:"api"`
@@ -15,28 +15,28 @@ type (
 		PG   `yaml:"postgres"`
 	}
 
-	// App -.
+	// App - config application configuration: name and version.
 	App struct {
 		Name    string `env-required:"true" yaml:"name"    env:"APP_NAME"`
 		Version string `env-required:"true" yaml:"version" env:"APP_VERSION"`
 	}
 
-	// Api -.
+	// Api - config for api keys and other config.
 	Api struct {
 		OpenweathermapKey string `env-required:"true" env:"OW_KEY"`
 	}
 
-	// HTTP -.
+	// HTTP - config for http server.
 	HTTP struct {
 		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 	}
 
-	// Log -.
+	// Log - config for logger.
 	Log struct {
 		Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
 	}
 
-	// PG -.
+	// PG - config for postgres.
 	PG struct {
 		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
 		URL     string `env-required:"true"                 env:"PG_URL"`
@@ -49,12 +49,12 @@ func NewConfig() (*Config, error) {
 
 	err := cleanenv.ReadConfig("./config/config.yml", cfg)
 	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+		return nil, fmt.Errorf("config - NewConfig - cleanenv.ReadConfig: %w", err)
 	}
 
 	err = cleanenv.ReadEnv(cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("config - NewConfig - cleanenv.ReadEnv: %w", err)
 	}
 
 	return cfg, nil

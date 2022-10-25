@@ -23,9 +23,9 @@ func NewTemperature(temp facade.TemperatureFacade, log logger.Logger) *Temperatu
 // swagger:route GET /city/{country}/{name}/weather/{timestamp} temperature DetailSingle
 // Return temperature from the database
 // responses:
-//	200: TemperatureResponse
-//	404: GenericError
-//	500: GenericError
+// 	200: TemperatureResponse
+//	404: errorResponse
+//	500: errorResponse
 
 // DetailSingle handles GET requests
 func (h *Temperature) DetailSingle(rw http.ResponseWriter, r *http.Request) {

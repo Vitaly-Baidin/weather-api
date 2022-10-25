@@ -1,18 +1,3 @@
-// Package v1 of weather API
-//
-// Documentation for weather API
-//
-//	Schemes: http
-//	BasePath: /
-//	Version: 1.0.0
-//
-//	Consumes:
-//	- application/json
-//
-//	Produces:
-//	- application/json
-//
-// swagger:meta
 package v1
 
 import (
@@ -23,6 +8,7 @@ import (
 	"net/http"
 )
 
+// NewRouter - return new gorilla router
 func NewRouter(cityFacade facade.CityFacade, tempFacade facade.TemperatureFacade, l logger.Logger) *mux.Router {
 	sm := mux.NewRouter()
 
