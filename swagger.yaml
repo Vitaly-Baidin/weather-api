@@ -1,0 +1,186 @@
+basePath: /
+consumes:
+    - application/json
+definitions:
+    Cities:
+        description: Cities defines the structure for an weather API
+        items:
+            $ref: '#/definitions/City'
+        type: array
+        x-go-package: github.com/Vitaly-Baidin/weather-api/entity
+    City:
+        description: City defines the structure for an weather API
+        properties:
+            country:
+                description: the name country for this City
+                maxLength: 200
+                type: string
+                x-go-name: Country
+            lat:
+                description: the latitude for this City
+                format: double
+                type: number
+                x-go-name: Latitude
+            lon:
+                description: the longitude for this City
+                format: double
+                type: number
+                x-go-name: Longitude
+            name:
+                description: the name for this City
+                maxLength: 200
+                type: string
+                x-go-name: Name
+        required:
+            - name
+            - country
+            - lat
+            - lon
+        type: object
+        x-go-package: github.com/Vitaly-Baidin/weather-api/entity
+    CityResponse:
+        description: CityResponse defines the structure for an weather API
+        properties:
+            country:
+                description: the name country for this CityResponse
+                type: string
+                x-go-name: Country
+            name:
+                description: the name for this CityResponse
+                type: string
+                x-go-name: Name
+            temperature:
+                description: actual temp for this CityResponse
+                format: double
+                type: number
+                x-go-name: Temperature
+            weather:
+                description: list temp for this CityResponse
+                items:
+                    $ref: '#/definitions/Temperature'
+                type: array
+                x-go-name: Weather
+        type: object
+        x-go-package: github.com/Vitaly-Baidin/weather-api/entity
+    GenericError:
+        properties:
+            message:
+                type: string
+                x-go-name: Message
+        type: object
+        x-go-package: github.com/Vitaly-Baidin/weather-api/internal/controller/http/v1
+    Temperature:
+        description: Temperature defines the structure for an weather API
+        properties:
+            Temperature:
+                description: temperature for the temperature
+                format: double
+                type: number
+            dt:
+                description: timestamp for the temperature
+                format: int64
+                type: integer
+                x-go-name: Timestamp
+        required:
+            - dt
+            - Temperature
+        type: object
+        x-go-package: github.com/Vitaly-Baidin/weather-api/entity
+    TemperatureResponse:
+        description: TemperatureResponse defines the structure for an weather API
+        properties:
+            data:
+                description: the data for this TemperatureResponse
+                type: object
+                x-go-name: Data
+            date:
+                description: the timestamp for this TemperatureResponse
+                format: int64
+                type: integer
+                x-go-name: Timestamp
+            temperature:
+                description: the temperature for this TemperatureResponse
+                format: double
+                type: number
+                x-go-name: Temperature
+        type: object
+        x-go-package: github.com/Vitaly-Baidin/weather-api/entity
+    Temperatures:
+        description: Temperatures defines the structure for an weather API
+        properties:
+            list:
+                description: list Temperature
+                items:
+                    type: object
+                type: array
+                x-go-name: Data
+        type: object
+        x-go-package: github.com/Vitaly-Baidin/weather-api/entity
+info:
+    description: Documentation for weather API
+    title: of weather API
+    version: 1.0.0
+paths:
+    /city:
+        get:
+            description: Return a list of city from the database
+            operationId: ListAll
+            responses:
+                "200":
+                    $ref: '#/responses/cityResponse'
+                "404":
+                    $ref: '#/responses/errorResponse'
+                "500":
+                    $ref: '#/responses/errorResponse'
+            tags:
+                - cities
+    /city/{country}/{name}/summary:
+        get:
+            description: Return city from the database
+            operationId: SummarySingle
+            responses:
+                "200":
+                    $ref: '#/responses/cityResponse'
+                "404":
+                    $ref: '#/responses/errorResponse'
+                "500":
+                    $ref: '#/responses/errorResponse'
+            tags:
+                - city
+    /city/{country}/{name}/weather/{timestamp}:
+        get:
+            description: Return temperature from the database
+            operationId: DetailSingle
+            responses:
+                "200":
+                    description: TemperatureResponse
+                    schema:
+                        $ref: '#/definitions/TemperatureResponse'
+                "404":
+                    $ref: '#/responses/errorResponse'
+                "500":
+                    $ref: '#/responses/errorResponse'
+            tags:
+                - temperature
+produces:
+    - application/json
+responses:
+    cities:
+        description: A list of city
+        schema:
+            $ref: '#/definitions/Cities'
+    cityResponse:
+        description: city
+        schema:
+            $ref: '#/definitions/CityResponse'
+    errorResponse:
+        description: Generic error message returned as a string
+        schema:
+            $ref: '#/definitions/GenericError'
+    temperatureResponse:
+        description: temperature
+        schema:
+            $ref: '#/definitions/TemperatureResponse'
+schemes:
+    - http
+swagger: "2.0"
